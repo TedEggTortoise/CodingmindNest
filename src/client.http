@@ -1,3 +1,7 @@
+# HTTP test
+
+## Baic Test
+
 GET http://localhost:3000/test
 
 ###
@@ -8,10 +12,57 @@ Content-Type: application/json
   "example": "my example data"
 }
 
+## User
+
 ###
 GET http://localhost:3000/users
 
 ###
 GET http://localhost:3000/users/1
 
+
+## Todo
+
+### Get all todos
+GET http://localhost:3000/todos
+
+### Get a single todo by ID
+GET http://localhost:3000/todos/1
+
 ###
+GET http://localhost:3000/todos/2
+
+###
+GET http://localhost:3000/todos/3
+
+###
+GET http://localhost:3000/todos/4
+
+
+### Create a new todo
+POST http://localhost:3000/todos
+Content-Type: application/json
+
+{
+  "title": "Learn NestJS",
+  "description": "Finish the controller and service",
+  "completed": false
+}
+
+### Update a todo
+PATCH http://localhost:3000/todos/1
+Content-Type: application/json
+
+{
+  "title": "Updated Todo Title",
+  "completed": true
+}
+
+### Delete a todo
+DELETE http://localhost:3000/todos/1
+
+
+
+
+
+
