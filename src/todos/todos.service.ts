@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { createTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 export interface Todo {
   id: number;
@@ -11,6 +12,8 @@ export interface Todo {
 
 @Injectable()
 export class TodosService {
+  constructor(private prisma: PrismaService) {}
+
   private todos: Todo[] = [
     { id: 1, title: 'Laundry', text: 'Todo1', completed: false },
     { id: 2, title: 'todo2', text: 'Todo2', completed: true },
@@ -18,19 +21,29 @@ export class TodosService {
   ];
 
   getTodos() {
-    return this.todos;
+    // return this.todos;
+    return this.prisma.todo.findMany({});
   }
 
   getTodo(id: number) {
-    const todo = this.todos.find((todo) => todo.id === id);
+    //const todo = this.todos.find((todo) => todo.id === id);
+    const todo = this.prisma.todo.findUnique({
+      where: { id },
+    });
     return todo;
   }
 
-  createTodo(data: createTodoDto) {
-    const maxId = Math.max(...this.todos.map((todo) => todo.id));
-    const newTodo: Todo = { id: maxId + 1, ...data };
-    this.todos.push(newTodo);
-    return newTodo;
+  async createTodo(data: createTodoDto) {
+    // const maxId = Math.max(...this.todos.map((todo) => todo.id));
+    // const newTodo: Todo = { id: maxId + 1, ...data };
+    // this.todos.push(newTodo);
+    return await this.prisma.todo.create({
+      data: {
+        title: data.title,
+        text: data.text,
+        completed: data.completed || false,
+      },
+    });
   }
 
   updateTodo(id: number, updateTodoDto: UpdateTodoDto) {
@@ -39,20 +52,33 @@ export class TodosService {
       throw new NotFoundException('Todo not found');
     }
 
-    if (updateTodoDto.title) {
-      todo.title = updateTodoDto.title;
-    }
-    if (updateTodoDto.text) {
-      todo.text = updateTodoDto.text;
-    }
-    if (updateTodoDto.completed) {
-      todo.completed = updateTodoDto.completed;
-    }
-    return todo;
+    // if (updateTodoDto.title) {
+    //   todo.title = updateTodoDto.title;
+    // }
+    // if (updateTodoDto.text) {
+    //   todo.text = updateTodoDto.text;
+    // }
+    // if (updateTodoDto.completed) {
+    //   todo.completed = updateTodoDto.completed;
+    // }
+    return this.prisma.todo.update({
+      where: { id },
+      data: {
+        ...(updateTodoDto.title && { title: updateTodoDto.title }),
+        ...(updateTodoDto.text && { text: updateTodoDto.text }),
+        ...(updateTodoDto.completed !== undefined && {
+          completed: updateTodoDto.completed,
+        }),
+      },
+    });
   }
 
   deleteTodo(id: number) {
-    this.todos = this.todos.filter((todo) => todo.id !== id);
-    return this.todos;
+    // this.todos = this.todos.filter((todo) => todo.id !== id);
+    //return this.getTodos();
+
+    return this.prisma.todo.delete({
+      where: { id },
+    });
   }
 }
